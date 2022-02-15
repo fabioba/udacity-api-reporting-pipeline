@@ -21,19 +21,22 @@ logger=logging.getLogger(__name__)
 app = Flask(__name__)
 
 
-def get_predicted_data(filename):
+def get_predicted_data(data):
     """
         Read model and return predicted data
 
         Args:
-            filename(str): path of the input file
+            data(pandas Dataframe):  input data
     """
     try:
         logger.info('START')
-        predict_data=pd.read_csv(filename)
+        
+        # read model
+        model=pickle.load(open('model/deployedmodel.pkl','rb'))
 
+        predicts=model.predict(data)
 
-        return 
+        return predicts
     except Exception as err:
         logger.exception(err)
         raise
@@ -47,10 +50,11 @@ def predict(filename):
     """
     try:
         logger.info('START')
-        predict_data=pd.read_csv(filename)
+        input_data=pd.read_csv(filename)
 
+        result=get_predicted_data(input_data)
 
-        return 
+        return result
     except Exception as err:
         logger.exception(err)
 
@@ -58,14 +62,13 @@ def predict(filename):
 
 @app.route('/')
 def index():
-    user = request.args.get('user')
-    return "Hello " + user + '\n'
+    return "Home \n"
 
 @app.route('/prediction')
 def prediction():
     filename = request.args.get('filename')
-    thedata=readpandas(filename)
-    return str(len(thedata.index))
+    predicted_data=predict(filename)
+    return str(predicted_data)
 
 
 app.run(host='0.0.0.0', port=8000)
